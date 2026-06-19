@@ -2,9 +2,9 @@
 
 ## Executive Summary
 
-This project is a local-first DevSecOps platform that demonstrates how a production-grade cloud security platform would be designed, validated, monitored, and governed without creating real AWS resources.
+This project is a DevSecOps platform reference implementation that demonstrates how a production-grade cloud security platform can be designed, validated, monitored, and governed.
 
-The runnable environment uses Docker, Kind, Kubernetes, GitHub Actions, ArgoCD, Prometheus, Grafana, Alertmanager, Falco, Trivy, and OPA Gatekeeper. The AWS layer is represented as validated Terraform design modules for VPC, EKS, GuardDuty, Security Hub, CloudTrail, and WAF.
+The runnable environment uses Docker, Kind, Kubernetes, GitHub Actions, ArgoCD, Prometheus, Grafana, Alertmanager, Falco, Trivy, and OPA Gatekeeper. The AWS production layer is represented through Terraform modules for VPC, EKS, GuardDuty, Security Hub, CloudTrail, and WAF.
 
 In simple terms:
 
@@ -14,7 +14,11 @@ In simple terms:
 - Prometheus and Alertmanager monitor application and workload health.
 - Falco detects suspicious runtime behavior inside containers.
 - OPA Gatekeeper blocks unsafe Kubernetes workloads before they enter the cluster.
-- Terraform models the AWS production architecture but is not applied.
+- Terraform defines the AWS production architecture.
+
+## Reference Diagram
+
+![Enterprise DevSecOps Flow](images/devsecops-flow.png)
 
 ## System Context
 
@@ -33,10 +37,12 @@ flowchart TB
   Cluster --> Admission["OPA Gatekeeper Admission Control"]
 
   Repo --> Terraform["AWS Terraform Design Modules"]
-  Terraform -. "validate only, no apply" .-> AWSDesign["AWS Reference Architecture"]
+  Terraform --> AWSDesign["AWS Reference Architecture"]
 ```
 
 ## Local Kubernetes Runtime
+
+![Local DevSecOps Environment](images/local-devsecops-environment.png)
 
 ```mermaid
 flowchart LR
@@ -84,6 +90,8 @@ The project uses GitHub Actions as the quality gate. The pipeline does not deplo
 
 ## Security Architecture
 
+![Security and Runtime Detection Flow](images/devsecops-flow.png)
+
 ```mermaid
 flowchart TB
   subgraph Prevent["Prevent"]
@@ -123,6 +131,8 @@ Security controls are layered:
 - Monitoring security: PrometheusRule resources detect CPU pressure, memory pressure, crash loops, and frequent restarts.
 
 ## Observability Flow
+
+![Observability Architecture](images/observability-architecture.png)
 
 ```mermaid
 flowchart LR
@@ -193,6 +203,8 @@ Namespace labeling is configured in dry-run mode to show how audit-only governan
 
 ## AWS Reference Architecture
 
+![AWS Production Reference Architecture](images/aws-production-reference-architecture.png)
+
 ```mermaid
 flowchart TB
   Internet["Internet"] --> WAF["AWS WAF"]
@@ -221,7 +233,7 @@ flowchart TB
   Nodes --> Pods
 ```
 
-The AWS layer is intentionally design-only. Terraform modules are provided and validated, but not applied. This proves cloud architecture capability while avoiding accidental AWS charges.
+The AWS layer describes how the same platform maps to production cloud primitives. Terraform modules define the network, Kubernetes, perimeter protection, audit logging, threat detection, and security findings components.
 
 Terraform modules:
 
@@ -257,13 +269,8 @@ The platform is designed around Git-based remediation. Changes are made in code,
 - Runtime threat detection with Falco
 - Admission control with OPA Gatekeeper
 - Secure AWS architecture design with Terraform
-- Cost-aware cloud engineering discipline
+- Cloud security architecture discipline
 
-## What This Project Does Not Do
+## Production Readiness Notes
 
-- It does not create AWS infrastructure.
-- It does not push container images to a public registry.
-- It does not implement production identity, secrets management, or real incident paging.
-- It does not claim the local Kind cluster is a substitute for production EKS.
-
-Those choices are deliberate. The project focuses on demonstrating architecture, security controls, and DevSecOps workflows without creating cloud cost.
+This reference implementation focuses on platform architecture, CI/CD validation, security controls, observability, and AWS infrastructure design. A production deployment would normally add image registry promotion, secrets management, identity federation, centralized logging, and incident-management integrations.

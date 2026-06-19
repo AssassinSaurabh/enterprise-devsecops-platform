@@ -31,7 +31,7 @@ AWS design layer:
 - Terraform CloudTrail module
 - Terraform WAF module
 
-AWS resources are not applied by default.
+The AWS layer is documented through Terraform modules and an example production composition.
 
 ## Completed Milestones
 
@@ -80,7 +80,7 @@ Status: Complete
 - Added production-style Terraform modules.
 - Added a `prod-design` example composition.
 - Validated Terraform with `terraform validate`.
-- Did not run `terraform apply`.
+- Added a production-oriented Terraform composition.
 
 ### CI/CD
 

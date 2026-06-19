@@ -1,12 +1,6 @@
 # Terraform AWS Design
 
-This directory contains production-style AWS Terraform modules for the portfolio architecture.
-
-Important:
-
-- These modules are design-only by default.
-- Do not run `terraform apply` unless you intentionally want to create AWS resources.
-- Running `terraform apply` can create AWS costs.
+This directory contains production-style AWS Terraform modules for the platform reference architecture.
 
 Modules:
 
@@ -17,7 +11,7 @@ Modules:
 - `cloudtrail`
 - `waf`
 
-Safe validation:
+Validation:
 
 ```bash
 terraform -chdir=terraform/environments/prod-design init -backend=false

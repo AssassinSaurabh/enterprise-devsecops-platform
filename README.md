@@ -3,209 +3,234 @@
 [![Platform CI](https://github.com/AssassinSaurabh/enterprise-devsecops-platform/actions/workflows/platform-ci.yaml/badge.svg)](https://github.com/AssassinSaurabh/enterprise-devsecops-platform/actions/workflows/platform-ci.yaml)
 [![Security Scan](https://github.com/AssassinSaurabh/enterprise-devsecops-platform/actions/workflows/security.yaml/badge.svg)](https://github.com/AssassinSaurabh/enterprise-devsecops-platform/actions/workflows/security.yaml)
 
-## What This Project Is
+## Hero Banner
 
-This is a DevSecOps portfolio platform that shows how a secure Kubernetes platform would be built, monitored, scanned, governed, and designed for AWS.
+![Enterprise Secure Kubernetes Platform](docs/images/devsecops-flow.png)
 
-It runs locally using Docker and Kind, so it does not create AWS bills. The AWS side is represented with Terraform modules that are validated but not applied.
+**Enterprise Secure Kubernetes Platform** is a DevSecOps portfolio project that combines Kubernetes, GitHub Actions, GitOps, runtime security, policy-as-code, observability, and AWS production architecture design.
 
-Project title:
+## Project Overview
 
-**Enterprise Secure Kubernetes Platform on AWS with Automated Threat Detection and Incident Response**
+This project demonstrates how a DevSecOps engineer designs and operates a secure Kubernetes platform.
 
-## Baby Explanation
+The platform includes:
 
-Imagine this project as a secure office building:
+- Three microservices: `auth-service`, `order-service`, and `payment-service`
+- Kubernetes deployments, services, ingress, namespaces, and monitoring resources
+- GitHub Actions for CI validation and security scanning
+- ArgoCD for GitOps-style delivery
+- Prometheus, Grafana, and Alertmanager for observability
+- Falco for runtime threat detection
+- OPA Gatekeeper for admission control
+- Terraform modules for AWS production architecture
 
-- The apps are the rooms where work happens.
-- Kubernetes is the building manager that keeps rooms running.
-- GitHub Actions is the security checkpoint before anything enters the building.
-- ArgoCD is the person who keeps the building matching the official blueprint.
-- Prometheus watches health signals like CPU, memory, crashes, and restarts.
-- Alertmanager decides how alerts should be grouped and routed.
-- Falco is the security camera watching what containers do at runtime.
-- OPA Gatekeeper is the front-door guard that blocks unsafe Kubernetes objects.
-- Terraform is the AWS blueprint, but it is not used to build real AWS resources unless someone intentionally chooses to do that later.
+In simple words, this project shows what happens from code commit to secure Kubernetes operation:
 
-## What It Actually Does
-
-The repository contains:
-
-- Three Python Flask microservices: auth, order, and payment.
-- Kubernetes manifests for deployments, services, ingress, namespaces, and monitoring.
-- Prometheus Operator resources for service discovery and alerting.
-- Falco configuration for runtime threat detection.
-- OPA Gatekeeper policies for admission control.
-- Terraform modules for production-style AWS architecture design.
-- GitHub Actions workflows for CI and security scanning.
-- Professional architecture documentation and diagrams.
+1. Code is pushed to GitHub.
+2. GitHub Actions validates the platform.
+3. ArgoCD syncs Kubernetes manifests.
+4. OPA Gatekeeper checks workloads before they run.
+5. Prometheus watches health and resource signals.
+6. Falco watches runtime container behavior.
+7. Terraform describes the AWS production platform.
 
 <details>
-<summary>Click to see the platform in one sentence</summary>
+<summary>Simple explanation for beginners</summary>
 
-Code is pushed to GitHub, GitHub Actions validates it, ArgoCD represents GitOps delivery to Kubernetes, Prometheus monitors it, Alertmanager routes alerts, Falco detects runtime threats, OPA Gatekeeper blocks unsafe workloads, and Terraform documents the AWS production design without creating cloud resources.
+Think of this as a secure application factory:
+
+- GitHub stores the blueprint.
+- GitHub Actions checks the blueprint before use.
+- ArgoCD sends the blueprint to Kubernetes.
+- Kubernetes runs the application.
+- OPA Gatekeeper blocks unsafe workloads at the door.
+- Falco watches containers after they start.
+- Prometheus and Grafana show health and performance.
+- Alertmanager sends alerts when something needs attention.
+- Terraform describes how the same platform maps to AWS.
 
 </details>
 
-## High-Level Architecture
+## Architecture Diagram
+
+![Local DevSecOps Environment](docs/images/local-devsecops-environment.png)
+
+The local architecture shows the core delivery flow:
+
+- Developer pushes to GitHub.
+- GitHub Actions validates Docker, Trivy, Terraform, and Kubernetes manifests.
+- ArgoCD represents GitOps delivery.
+- The Kubernetes cluster runs the three application services.
+
+## Security Architecture
+
+![DevSecOps Flow](docs/images/devsecops-flow.png)
+
+Security is applied in multiple layers:
+
+- **Before deployment:** GitHub Actions runs Docker build, Trivy scan, Terraform validation, and Kubernetes manifest validation.
+- **During deployment:** OPA Gatekeeper validates workloads through Kubernetes admission control.
+- **After deployment:** Falco detects suspicious runtime behavior inside containers.
+- **During operations:** Prometheus, Grafana, and Alertmanager provide visibility and alerting.
+
+## Observability Architecture
+
+![Observability Architecture](docs/images/observability-architecture.png)
+
+Observability is built around Prometheus and Grafana:
+
+- Application services expose metrics.
+- Prometheus collects and stores metrics.
+- Alertmanager routes alerts.
+- Grafana provides dashboards.
+- Engineers monitor CPU, memory, restarts, and CrashLoopBackOff events.
+
+## AWS Production Architecture
+
+![AWS Production Reference Architecture](docs/images/aws-production-reference-architecture.png)
+
+The AWS production reference architecture maps the platform to cloud-native AWS services:
+
+- AWS WAF protects traffic before it reaches the application layer.
+- Application Load Balancer routes external traffic.
+- Amazon EKS hosts Kubernetes workloads.
+- Worker nodes run across private subnets.
+- OPA Gatekeeper and Falco provide Kubernetes security controls.
+- Prometheus, Grafana, and Alertmanager provide observability.
+- GuardDuty, Security Hub, and CloudTrail provide AWS security visibility.
+- Terraform modules define the AWS infrastructure.
+
+## Runtime Threat Detection Workflow
 
 ```mermaid
-flowchart TB
-  Dev["Developer"] --> GitHub["GitHub Repository"]
-  GitHub --> Actions["GitHub Actions"]
-  GitHub --> ArgoCD["ArgoCD"]
+sequenceDiagram
+  participant Attacker as Suspicious Actor
+  participant Pod as Application Pod
+  participant Runtime as Container Runtime
+  participant Falco as Falco
+  participant Alert as Security Alert
+  participant Engineer as Platform Engineer
 
-  Actions --> CIChecks["Build, Validate, Scan"]
-  ArgoCD --> Kind["Kind Kubernetes Cluster"]
-
-  Kind --> Apps["auth, order, payment services"]
-  Kind --> Monitoring["Prometheus, Grafana, Alertmanager"]
-  Kind --> Falco["Falco Runtime Security"]
-  Kind --> Gatekeeper["OPA Gatekeeper"]
-
-  GitHub --> Terraform["Terraform AWS Design"]
-  Terraform -. "validate only" .-> AWS["AWS Reference Architecture"]
+  Attacker->>Pod: kubectl exec or suspicious process
+  Pod->>Runtime: Shell or file access event
+  Runtime->>Falco: System call metadata
+  Falco->>Falco: Match runtime rule
+  Falco->>Alert: Emit JSON security event
+  Alert->>Engineer: Investigate pod, namespace, user, command
 ```
 
-## How AWS Fits In
+Falco detections included in this project:
 
-```mermaid
-flowchart LR
-  GitHub["GitHub Actions"] --> Validate["Terraform Validate"]
-  Validate --> Modules["AWS Terraform Modules"]
-
-  subgraph DesignOnly["Design only, no apply"]
-    Modules --> VPC["VPC"]
-    Modules --> EKS["EKS"]
-    Modules --> WAF["WAF"]
-    Modules --> GuardDuty["GuardDuty"]
-    Modules --> SecurityHub["Security Hub"]
-    Modules --> CloudTrail["CloudTrail"]
-  end
-
-  DesignOnly -. "No AWS resources created" .-> Cost["Cost: zero by default"]
-```
-
-The Terraform code models what would exist in AWS:
-
-- VPC networking
-- Private and public subnets
-- EKS cluster and node group
-- WAF managed rules
-- GuardDuty threat detection
-- Security Hub compliance aggregation
-- CloudTrail audit logging
-
-The project validates the design but does not run `terraform apply`.
+- Shell spawned inside application container
+- Sensitive file read inside application container
+- Package manager started inside application container
 
 ## CI/CD Pipeline
 
 ```mermaid
-sequenceDiagram
-  participant Dev as Developer
-  participant Git as GitHub
-  participant CI as GitHub Actions
-  participant K8s as Kubernetes Manifests
-  participant TF as Terraform
-  participant Docker as Docker
-  participant Trivy as Trivy
-
-  Dev->>Git: Push commit
-  Git->>CI: Trigger workflows
-  CI->>K8s: Render Kubernetes manifests
-  CI->>TF: Format and validate Terraform
-  CI->>Docker: Build service images
-  CI->>Trivy: Run security scan
-  CI->>Git: Report pass or fail
+flowchart LR
+  Developer["Developer"] --> GitHub["GitHub Repository"]
+  GitHub --> Actions["GitHub Actions"]
+  Actions --> Build["Docker Build"]
+  Actions --> Scan["Trivy Scan"]
+  Actions --> Terraform["Terraform Validate"]
+  Actions --> K8s["Kubernetes Manifest Validation"]
+  Actions --> ArgoCD["ArgoCD GitOps"]
+  ArgoCD --> Cluster["Kubernetes Cluster"]
+  Cluster --> Services["auth, order, payment services"]
 ```
 
-Current workflows:
+GitHub Actions workflows:
 
 - `Platform CI`
 - `Security Scan`
 
-Both workflows are expected to pass on `main`.
+Both workflows run on push and pull request.
 
-## Runtime Security
+## Key Features
 
-Falco runs as a DaemonSet and watches container behavior across the local Kind nodes.
+- Multi-service Kubernetes application
+- GitHub Actions CI validation
+- Trivy filesystem security scanning
+- ArgoCD GitOps workflow
+- Prometheus service discovery with ServiceMonitor
+- Alertmanager alert routing
+- PrometheusRule alerts for workload health
+- Falco runtime threat detection
+- OPA Gatekeeper admission control
+- Terraform AWS platform modules
+- Professional architecture documentation
 
-Custom detections include:
+## Technology Stack
 
-- Shell spawned inside application container
-- Sensitive file read inside application container
-- Package manager execution inside application container
-
-These detections show how a cloud security engineer can identify suspicious runtime behavior after a container is already running.
-
-<details>
-<summary>Example Falco scenario</summary>
-
-If someone opens a shell inside the `auth-service` container or reads `/etc/passwd`, Falco sees the system call, matches the custom runtime rule, and emits a JSON security alert containing the namespace, pod, container, user, command, and rule name.
-
-</details>
-
-## Policy as Code
-
-OPA Gatekeeper is used for Kubernetes admission control.
-
-Current policies:
-
-- Deny pods in `dev` that do not define CPU and memory requests/limits.
-- Deny privileged pods in `dev`.
-- Audit namespace labels in dry-run mode.
-
-This means unsafe workloads can be blocked before they run.
-
-<details>
-<summary>Example OPA Gatekeeper scenario</summary>
-
-If someone tries to create a pod in the `dev` namespace without CPU and memory limits, Gatekeeper denies it at admission time. If someone tries to run a privileged pod in `dev`, Gatekeeper denies that too.
-
-</details>
-
-## Observability and Alerts
-
-Prometheus collects metrics from the microservices and Kubernetes workloads.
-
-Alert coverage:
-
-- High CPU usage
-- High memory usage
-- CrashLoopBackOff
-- Frequent container restarts
-
-Alertmanager groups and routes alerts.
-
-<details>
-<summary>Example alert scenario</summary>
-
-If a service starts crashing repeatedly, Kubernetes exposes restart and waiting-state metrics. Prometheus evaluates the alert rules, and Alertmanager groups the alert so an engineer can investigate the failing pod.
-
-</details>
+| Area | Tools |
+| --- | --- |
+| Application | Python, Flask |
+| Containers | Docker |
+| Kubernetes | Kind, Kubernetes manifests, Ingress |
+| GitOps | ArgoCD |
+| CI/CD | GitHub Actions |
+| Security Scanning | Trivy |
+| Runtime Security | Falco |
+| Policy as Code | OPA Gatekeeper, Rego |
+| Monitoring | Prometheus, Grafana, Alertmanager |
+| Cloud Design | Terraform, AWS VPC, EKS, WAF, GuardDuty, Security Hub, CloudTrail |
 
 ## Repository Structure
 
 ```text
-app/                  Flask microservices
-argocd/               ArgoCD application definition
-kubernetes/           Kubernetes workloads, services, ingress, monitoring
-security/falco/       Falco Helm values and custom runtime rules
-security/opa/         OPA Gatekeeper policies and tests
-terraform/            AWS design-only Terraform modules
-docs/                 Professional architecture and roadmap docs
-.github/workflows/    GitHub Actions CI and security workflows
+app/
+  auth-service/
+  order-service/
+  payment-service/
+
+argocd/
+  auth-app.yaml
+
+kubernetes/
+  auth/
+  order/
+  payment/
+  monitoring/
+  namespaces/
+  ingress.yaml
+  kustomization.yaml
+
+security/
+  falco/
+  opa/gatekeeper/
+
+terraform/
+  modules/
+  environments/prod-design/
+
+docs/
+  architecture.md
+  roadmap.md
+  images/
+  runbooks/
+
+.github/workflows/
+  platform-ci.yaml
+  security.yaml
 ```
 
-## Local Validation Commands
+## Getting Started
 
-Render Kubernetes:
+Clone the repository:
+
+```bash
+git clone git@github.com:AssassinSaurabh/enterprise-devsecops-platform.git
+cd enterprise-devsecops-platform
+```
+
+Validate Kubernetes manifests:
 
 ```bash
 kubectl kustomize kubernetes
 ```
 
-Render Gatekeeper policies:
+Validate OPA Gatekeeper policies:
 
 ```bash
 kubectl kustomize security/opa/gatekeeper
@@ -218,11 +243,55 @@ terraform -chdir=terraform/environments/prod-design init -backend=false
 terraform -chdir=terraform/environments/prod-design validate
 ```
 
-Run security scan:
+Build service images:
+
+```bash
+docker build -t auth-service ./app/auth-service
+docker build -t order-service ./app/order-service
+docker build -t payment-service ./app/payment-service
+```
+
+Run the security scan:
 
 ```bash
 trivy fs --db-repository public.ecr.aws/aquasecurity/trivy-db:2 --severity HIGH,CRITICAL --ignore-unfixed --exit-code 1 .
 ```
+
+## Security Controls
+
+### CI Security
+
+- Trivy scans the repository for high and critical findings.
+- Docker builds verify service container buildability.
+- Kubernetes manifests are rendered before merge.
+- Terraform configuration is formatted and validated.
+
+### Admission Security
+
+OPA Gatekeeper policies enforce:
+
+- Required CPU and memory requests/limits in `dev`
+- Denial of privileged pods in `dev`
+- Namespace label governance in dry-run mode
+
+### Runtime Security
+
+Falco detects:
+
+- Interactive shell execution
+- Sensitive file access
+- Package manager execution inside application containers
+
+## Monitoring & Alerting
+
+Prometheus alert rules cover:
+
+- High CPU usage
+- High memory usage
+- CrashLoopBackOff
+- Frequent container restarts
+
+Alertmanager groups and routes alert events. Grafana provides dashboard visualization.
 
 ## Documentation
 
@@ -231,15 +300,13 @@ trivy fs --db-repository public.ecr.aws/aquasecurity/trivy-db:2 --severity HIGH,
 - [Falco Runtime Security Runbook](docs/runbooks/falco-runtime-security.md)
 - [Terraform AWS Design](terraform/README.md)
 
-## Cost Control
+## Project Status
 
-This project is safe for a portfolio environment because:
+The platform is complete as a DevSecOps portfolio project:
 
-- The local platform runs on Docker and Kind.
-- Terraform is validated with `-backend=false`.
-- AWS modules are design-only.
-- No `terraform apply` is part of the normal workflow.
-
-## Professional Summary
-
-This project demonstrates practical DevSecOps engineering across application delivery, Kubernetes operations, runtime threat detection, policy-as-code, observability, CI security, and AWS platform design.
+- Application platform complete
+- CI/CD validation complete
+- Runtime security complete
+- Policy-as-code complete
+- Observability and alerting complete
+- AWS production architecture design complete
