@@ -1119,3 +1119,90 @@ Fix:
 Final result:
 
 - Repo-local Git config now uses `ssh -i ~/.ssh/assassin_gha_ed25519`.
+
+### Step 64: Push completed project to GitHub
+
+Command:
+
+```bash
+git push origin main
+```
+
+Result:
+
+```text
+1105b66..3919f75  main -> main
+```
+
+### Step 65: Query GitHub Actions runs
+
+First command:
+
+```bash
+curl -s https://api.github.com/repos/AssassinSaurabh/enterprise-devsecops-platform/actions/runs?branch=main\&per_page=5
+```
+
+Error:
+
+```text
+zsh:1: no matches found
+```
+
+Why it happened:
+
+- The URL contained query characters and was not quoted.
+
+Fixed command:
+
+```bash
+curl -s 'https://api.github.com/repos/AssassinSaurabh/enterprise-devsecops-platform/actions/runs?branch=main&per_page=5'
+```
+
+Result:
+
+- `Platform CI` completed successfully.
+- `Security Scan` failed.
+
+### Step 66: Inspect Security Scan failure
+
+Commands:
+
+```bash
+curl -s 'https://api.github.com/repos/AssassinSaurabh/enterprise-devsecops-platform/actions/runs/27813163194/jobs'
+curl -s 'https://api.github.com/repos/AssassinSaurabh/enterprise-devsecops-platform/check-runs/82307964230'
+curl -s -L 'https://api.github.com/repos/AssassinSaurabh/enterprise-devsecops-platform/actions/runs/27813163194/logs' | head -c 2000
+curl -s 'https://api.github.com/repos/AssassinSaurabh/enterprise-devsecops-platform/check-runs/82307964230/annotations'
+```
+
+Findings:
+
+- Logs endpoint returned `403` because admin rights are required.
+- Annotation endpoint worked.
+
+Failure reason:
+
+```text
+Unable to resolve action `aquasecurity/trivy-action@0.24.0`, unable to find version `0.24.0`
+```
+
+### Step 67: Check valid Trivy action tags
+
+Command:
+
+```bash
+git ls-remote --tags https://github.com/aquasecurity/trivy-action.git | tail -n 20
+```
+
+Finding:
+
+- Valid newer tag exists: `v0.36.0`.
+
+### Step 68: Fix Security Scan action version
+
+File:
+
+- `.github/workflows/security.yaml`
+
+Change:
+
+- Replaced `aquasecurity/trivy-action@0.24.0` with `aquasecurity/trivy-action@v0.36.0`.
