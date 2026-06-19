@@ -1206,3 +1206,77 @@ File:
 Change:
 
 - Replaced `aquasecurity/trivy-action@0.24.0` with `aquasecurity/trivy-action@v0.36.0`.
+
+### Step 69: Parse workflows after Security Scan fix
+
+Command:
+
+```bash
+ruby -e 'require "yaml"; Dir[".github/workflows/*.{yml,yaml}"].each { |f| YAML.load_file(f); puts "OK #{f}" }'
+```
+
+Result:
+
+```text
+OK .github/workflows/security.yaml
+OK .github/workflows/platform-ci.yaml
+```
+
+### Step 70: Commit Security Scan fix
+
+Commands:
+
+```bash
+git status --short
+git add .github/workflows/security.yaml docs/final-project-build-log.md
+git commit -m 'fix: pin valid trivy action version'
+```
+
+Result:
+
+```text
+[main c657da8] fix: pin valid trivy action version
+2 files changed, 88 insertions(+), 1 deletion(-)
+```
+
+### Step 71: Push Security Scan fix
+
+Command:
+
+```bash
+git push origin main
+```
+
+Result:
+
+```text
+3919f75..c657da8  main -> main
+```
+
+### Step 72: Poll GitHub Actions after Security Scan fix
+
+Command:
+
+```bash
+python3 - <<'PY'
+import json, urllib.request
+url='https://api.github.com/repos/AssassinSaurabh/enterprise-devsecops-platform/actions/runs?branch=main&per_page=10'
+with urllib.request.urlopen(url) as r:
+    data=json.load(r)
+for run in data['workflow_runs'][:6]:
+    print(run['id'], run['name'], run['head_sha'][:7], run['status'], run['conclusion'], run['html_url'])
+PY
+```
+
+Result:
+
+```text
+27813245322 Security Scan c657da8 completed success
+27813245292 Platform CI c657da8 completed success
+```
+
+Conclusion:
+
+- The final project workflows passed on GitHub Actions.
+- `Platform CI` is green.
+- `Security Scan` is green.
