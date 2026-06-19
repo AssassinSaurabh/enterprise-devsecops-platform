@@ -1,0 +1,70 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: platform-workload-alerts
+  namespace: monitoring
+  labels:
+    release: monitoring
+spec:
+  groups:
+    - name: platform.workload.health
+      rules:
+        - alert: PlatformPodCrashLooping
+          expr: |
+            max_over_time(kube_pod_container_status_waiting_reason{namespace="dev", reason="CrashLoopBackOff"}[5m]) > 0
+          for: 2m
+          labels:
+            severity: critical
+            team: platform
+          annotations:
+            summary: "Pod is crash looping in dev"
+            description: "Container {{ $labels.container }} in pod {{ $labels.pod }} has been in CrashLoopBackOff for more than 2 minutes."
+
+        - alert: PlatformPodRestartingFrequently
+          expr: |
+            increase(kube_pod_container_status_restarts_total{namespace="dev"}[15m]) >= 3
+          for: 5m
+          labels:
+            severity: warning
+            team: platform
+          annotations:
+            summary: "Pod is restarting frequently in dev"
+            description: "Container {{ $labels.container }} in pod {{ $labels.pod }} restarted at least 3 times in the last 15 minutes."
+
+    - name: platform.workload.resources
+      rules:
+        - alert: PlatformHighCPUUsage
+          expr: |
+            (
+              sum by (namespace, pod, container) (
+                rate(container_cpu_usage_seconds_total{namespace="dev", container!="", image!=""}[5m])
+              )
+              /
+              on (namespace, pod, container)
+              sum by (namespace, pod, container) (
+                kube_pod_container_resource_requests{namespace="dev", resource="cpu", unit="core"}
+              )
+            ) > 0.80
+          for: 10m
+          labels:
+            severity: warning
+            team: platform
+          annotations:
+            summary: "High CPU usage in dev"
+            description: "Container {{ $labels.container }} in pod {{ $labels.pod }} is using more than 80% of requested CPU for 10 minutes."
+
+        - alert: PlatformHighMemoryUsage
+          expr: |
+            (
+              container_memory_working_set_bytes{namespace="dev", container!="", image!=""}
+              /
+              on (namespace, pod, container)
+              kube_pod_container_resource_limits{namespace="dev", resource="memory", unit="byte"}
+            ) > 0.85
+          for: 10m
+          labels:
+            severity: warning
+            team: platform
+          annotations:
+            summary: "High memory usage in dev"
+            description: "Container {{ $labels.container }} in pod {{ $labels.pod }} is using more than 85% of its memory limit for 10 minutes."

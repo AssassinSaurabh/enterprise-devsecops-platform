@@ -1,0 +1,30 @@
+apiVersion: monitoring.coreos.com/v1alpha1
+kind: AlertmanagerConfig
+metadata:
+  name: platform-alert-routing
+  namespace: monitoring
+  labels:
+    release: monitoring
+spec:
+  route:
+    groupBy:
+      - namespace
+      - alertname
+      - severity
+    groupWait: 30s
+    groupInterval: 5m
+    repeatInterval: 4h
+    receiver: local-null
+    routes:
+      - matchers:
+          - name: severity
+            value: critical
+        receiver: local-null
+        repeatInterval: 1h
+      - matchers:
+          - name: severity
+            value: warning
+        receiver: local-null
+        repeatInterval: 4h
+  receivers:
+    - name: local-null

@@ -3,6 +3,7 @@ kind: Deployment
 
 metadata:
   name: auth-service
+  namespace: dev
 
 spec:
   replicas: 3
@@ -25,4 +26,11 @@ spec:
           imagePullPolicy: Never
 
           ports:
-            - containerPort: 5000
+            - containerPort: 5001
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 256Mi

@@ -1,0 +1,17 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - namespaces/dev.yaml
+  - namespaces/monitoring.yaml
+  - auth/deployment.yaml
+  - auth/service.yaml
+  - order/deployment.yaml
+  - order/service.yaml
+  - payment/deployment.yaml
+  - payment/service.yaml
+  - ingress.yaml
+  - monitoring/auth-servicemonitor.yaml
+  - monitoring/order-servicemonitor.yaml
+  - monitoring/payment-servicemonitor.yaml
+  - monitoring/alertmanager-config.yaml
+  - monitoring/platform-alerts.yaml

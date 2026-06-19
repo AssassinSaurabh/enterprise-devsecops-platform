@@ -1,0 +1,67 @@
+apiVersion: templates.gatekeeper.sh/v1
+kind: ConstraintTemplate
+metadata:
+  name: k8srequiredresources
+spec:
+  crd:
+    spec:
+      names:
+        kind: K8sRequiredResources
+      validation:
+        openAPIV3Schema:
+          type: object
+          properties:
+            exemptImages:
+              type: array
+              items:
+                type: string
+  targets:
+    - target: admission.k8s.gatekeeper.sh
+      rego: |
+        package k8srequiredresources
+
+        violation[{"msg": msg}] {
+          container := input.review.object.spec.containers[_]
+          not has_field(container, "resources")
+          msg := sprintf("container <%v> must define resources.requests and resources.limits", [container.name])
+        }
+
+        violation[{"msg": msg}] {
+          container := input.review.object.spec.containers[_]
+          not has_field(container.resources, "requests")
+          msg := sprintf("container <%v> must define resources.requests", [container.name])
+        }
+
+        violation[{"msg": msg}] {
+          container := input.review.object.spec.containers[_]
+          not has_field(container.resources, "limits")
+          msg := sprintf("container <%v> must define resources.limits", [container.name])
+        }
+
+        violation[{"msg": msg}] {
+          container := input.review.object.spec.containers[_]
+          not has_field(container.resources.requests, "cpu")
+          msg := sprintf("container <%v> must define resources.requests.cpu", [container.name])
+        }
+
+        violation[{"msg": msg}] {
+          container := input.review.object.spec.containers[_]
+          not has_field(container.resources.requests, "memory")
+          msg := sprintf("container <%v> must define resources.requests.memory", [container.name])
+        }
+
+        violation[{"msg": msg}] {
+          container := input.review.object.spec.containers[_]
+          not has_field(container.resources.limits, "cpu")
+          msg := sprintf("container <%v> must define resources.limits.cpu", [container.name])
+        }
+
+        violation[{"msg": msg}] {
+          container := input.review.object.spec.containers[_]
+          not has_field(container.resources.limits, "memory")
+          msg := sprintf("container <%v> must define resources.limits.memory", [container.name])
+        }
+
+        has_field(object, field) {
+          object[field]
+        }
